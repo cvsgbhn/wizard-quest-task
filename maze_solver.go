@@ -1,4 +1,4 @@
-package main
+package maze
 
 import (
 	"encoding/json"
@@ -26,7 +26,6 @@ func isRoom(node interface{}) (Room, bool) {
 }
 
 func isExit(node interface{}) bool {
-	fmt.Println("isExit")
 	a, ok := node.(string)
 	if ok && len(a) > 0 && a == "exit" {
 		return true
@@ -35,17 +34,15 @@ func isExit(node interface{}) bool {
 	return false
 }
 
-func visitNode(r *Room, pathPart []string) {
+func addPath(r *Room, pathPart []string) {
 	r.PastPath = append(r.PastPath, pathPart...)
 }
 
 func BFS(queue []Room) []string {
 	newQ := make([]Room, 0)
 	for len(queue) > 0 {
-		fmt.Println("newQ before new checks: ", newQ)
 		newQ = newQ[:0]
 
-		fmt.Println("queue: ", queue)
 		for i := range queue {
 			if queue[i].Visited == true {
 				continue
@@ -63,7 +60,7 @@ func BFS(queue []Room) []string {
 				}
 
 				if r.NextMaze != nil {
-					visitNode(&r, path)
+					addPath(&r, path)
 					newQ = append(newQ, r)
 				}
 			}
@@ -73,29 +70,50 @@ func BFS(queue []Room) []string {
 		if queue[0].Visited {
 			queue = queue[1:]
 		}
-
-		fmt.Println(queue)
 	}
 
 	return nil
 }
 
-//func MazeSolver(maze map[string]interface{}) string {
-//
-//}
+func MazeSolver(maze string) string {
+	r := Room{}
 
-func main() {
+	json.Unmarshal([]byte(maze), &r.NextMaze)
 
-	example := `{"forward": "tiger", "left": {"forward": {"upstairs": "exit"}, "left": "dragon"}, "right": {"forward": "dead end"}}`
-
-	maze := Room{}
-
-	json.Unmarshal([]byte(example), &maze.NextMaze)
-
-	fmt.Println(maze)
-
-	rooms := []Room{maze}
+	rooms := []Room{r}
 
 	res := BFS(rooms)
-	fmt.Println("Path to exit: ", res)
+
+	if len(res) == 0 {
+		fmt.Println("Sorry")
+		return "Sorry"
+	}
+
+	return formatOutput(res)
 }
+
+func formatOutput(ans []string) string {
+	s := "["
+
+	for i, v := range ans {
+		s += "\"" + v + "\""
+		if i < len(ans)-1 {
+			s += ", "
+		}
+	}
+
+	s += "]"
+
+	return s
+}
+
+//func main() {
+//
+//	example := `{"forward": "tiger", "left": {"forward": {"upstairs": "exit"}, "left": "dragon"}, "right": {"forward": "dead end"}}`
+//	//example := `{"forward": "exit"}`
+//	//example := `{"forward": "tiger", "left": "ogre", "right": "demon"}`
+//
+//	res := MazeSolver(example)
+//
+//	fmt.Println(res)
+//}

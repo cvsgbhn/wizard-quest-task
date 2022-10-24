@@ -40,3 +40,25 @@ using Golang
 
 ● Maze Generator (Bonus): Explain in one or two paragraphs how to generate an infinity of
 maze. Think of exceptions and weird cases
+
+# Solution for Maze Solver
+> Used BFS algorithm to find the shortest path
+
+## How to test
+`go test -v`
+
+# Maze Generator
+Suppose, we have a set of directions `{forward, left, right, upstairs, downstairs, behind the tree, ...}` and a set of endings `{exit, dragon, pool with sharks, ...}`
+
+To start, I will generate a first chunk of infinity of maze. As current maze is basically a tree, I would need an algorithm for that, for example [this one](https://www.geeksforgeeks.org/random-tree-generator-using-prufer-sequence-with-examples/). Each node can be a struct like this, for example:
+```go
+type Path struct {
+	Direction string
+	Ending string
+	NextPath *Path // there cannot be ending and nexpath at one time
+}
+```
+
+Also it makes sence to add a rules:
+1. There must be at least one Path with ending "exit" (or "borderline"). When user hits this ending - generate next chunk of a maze.
+2. The paths from one 'parent' must be distinct.
